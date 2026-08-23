@@ -349,14 +349,8 @@
    УТИЛИТЫ
    ========================================================= */
 function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min}
-function shuffle(arr){
-  const a=arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-  return a;
-}
+
+/* ИСПРАВЛЕНО: перемешивание с гарантией, что правильный ответ не всегда на позиции 0 */
 function shuffleWithCorrect(arr){
   const a = arr.slice();
   let attempts = 0, correctIdx;
@@ -368,21 +362,22 @@ function shuffleWithCorrect(arr){
     correctIdx = a.findIndex(item => item.isCorrect);
     attempts++;
   } while(correctIdx === 0 && attempts < 10);
+  
+  // ИСПРАВЛЕНО: если после 10 попыток правильный ответ всё ещё на позиции 0, принудительно меняем
+  if(correctIdx === 0){
+    [a[0], a[1]] = [a[1], a[0]];
+    correctIdx = 1;
+  }
+  
   return {shuffled: a, newCorrectIdx: correctIdx};
 }
 
 /* Форматирование ответа: целое или конечная десятичная */
 function fmtAnswer(x){
   if(Number.isInteger(x)) return String(x);
-  // Конечная десятичная
   let s = x.toFixed(6).replace(/\.?0+$/, "");
   if(s.includes(".")) s = s.replace(".", ",");
   return s;
-}
-
-/* Проверка равенства ответов */
-function answersEqual(a, b){
-  return Math.abs(a - b) < 1e-9;
 }
 
 /* =========================================================
@@ -414,12 +409,11 @@ function generateTask(type, difficulty){
 
   switch(pick){
 
-    /* ===== aⁿ = ? ===== */
     case "power": {
       const a = bases[randInt(0, bases.length-1)];
       const n = randInt(d===1?2:2, d===1?4:d===2?5:6);
       const correct = Math.pow(a, n);
-      const d1 = a * n; // типичная ошибка: умножение вместо возведения
+      const d1 = a * n;
       const d2 = a + n;
       const d3 = Math.pow(a, n-1);
       const text = `Вычислите: <span class="math">${a}<sup>${n}</sup></span>`;
@@ -427,7 +421,6 @@ function generateTask(type, difficulty){
       return buildChoice("Вычисление степени", text, correct, [d1,d2,d3], explanation);
     }
 
-    /* ===== aⁿ · aᵐ = aᵏ, найти k ===== */
     case "mult": {
       const a = bases[randInt(0, bases.length-1)];
       const n = randInt(2, d===1?4:d===2?6:8);
@@ -442,7 +435,6 @@ function generateTask(type, difficulty){
       return buildChoice("Умножение степеней", text, correct, [d1,d2,d3], explanation);
     }
 
-    /* ===== aⁿ : aᵐ = aᵏ, найти k ===== */
     case "div": {
       const a = bases[randInt(0, bases.length-1)];
       const n = randInt(4, d===1?6:d===2?8:10);
@@ -457,7 +449,6 @@ function generateTask(type, difficulty){
       return buildChoice("Деление степеней", text, correct, [d1,d2,d3], explanation);
     }
 
-    /* ===== (aⁿ)ᵐ = aᵏ, найти k ===== */
     case "pow_pow": {
       const a = bases[randInt(0, bases.length-1)];
       const n = randInt(2, d===1?3:d===2?4:5);
@@ -472,13 +463,12 @@ function generateTask(type, difficulty){
       return buildChoice("Степень в степени", text, correct, [d1,d2,d3], explanation);
     }
 
-    /* ===== Вычислить aⁿ · aᵐ = aⁿ⁺ᵐ ===== */
     case "calc_mult": {
       const a = bases[randInt(0, bases.length-1)];
       const n = randInt(2, d===1?3:d===2?4:5);
       const m = randInt(1, d===1?3:d===2?4:5);
       const correct = Math.pow(a, n + m);
-      const d1 = Math.pow(a, n) + Math.pow(a, m); // типичная ошибка: сложение вместо умножения
+      const d1 = Math.pow(a, n) + Math.pow(a, m);
       const d2 = Math.pow(a, n * m);
       const d3 = Math.pow(a, Math.abs(n - m));
       const text = `Вычислите: <span class="math">${a}<sup>${n}</sup> · ${a}<sup>${m}</sup></span>`;
@@ -486,9 +476,8 @@ function generateTask(type, difficulty){
       return buildChoice("Вычисление произведения", text, correct, [d1,d2,d3], explanation);
     }
 
-    /* ===== Вычислить (aⁿ)ᵐ ===== */
     case "calc_pow": {
-      const a = bases[randInt(0, Math.min(2, bases.length-1))]; // 2 или 3
+      const a = bases[randInt(0, Math.min(2, bases.length-1))];
       const n = randInt(2, 3);
       const m = randInt(2, d===1?2:d===2?3:4);
       const correct = Math.pow(a, n * m);
@@ -500,7 +489,6 @@ function generateTask(type, difficulty){
       return buildChoice("Вычисление степени степени", text, correct, [d1,d2,d3], explanation);
     }
 
-    /* ===== a⁻ⁿ ===== */
     case "neg": {
       const a = [2,4,5,10][randInt(0,3)];
       const n = randInt(1, d===1?2:d===2?3:4);
@@ -513,13 +501,11 @@ function generateTask(type, difficulty){
       return buildChoice("Отрицательная степень", text, correct, [d1,d2,d3], explanation);
     }
 
-    /* ===== Смешанное выражение ===== */
     case "mixed": {
       const a = [2,3,5][randInt(0,2)];
       const n1 = randInt(2, 4);
       const n2 = randInt(1, 3);
       const n3 = randInt(1, 3);
-      // (aⁿ¹ · aⁿ²) : aⁿ³ = aⁿ¹⁺ⁿ²⁻ⁿ³
       const k = n1 + n2 - n3;
       if(k <= 0) return generateTask(type, difficulty);
       const correct = Math.pow(a, k);
@@ -535,11 +521,8 @@ function generateTask(type, difficulty){
 
 /* =========================================================
    БАНК ЭКЗАМЕНА — 10 заданий
-   1-4: базовый, 5-8: средний, 9-10: сложный
-   Все ответы — целые или конечные десятичные
    ========================================================= */
 const EXAM_TASKS = [
-  // ===== БАЗОВЫЙ (1-4) =====
   {level:"Базовый",
    text:'Вычислите: <span class="math">2<sup>5</sup></span>',
    options:["10","32","64","7"],
@@ -560,8 +543,6 @@ const EXAM_TASKS = [
    options:["−100","0,01","−20","0,1"],
    correctIdx:1,
    explanation:"10⁻² = 1/10² = 1/100 = 0,01"},
-
-  // ===== СРЕДНИЙ (5-8) =====
   {level:"Средний",
    text:'Найдите значение выражения: <span class="math">(2<sup>3</sup>)<sup>4</sup> · 2<sup>−5</sup></span>',
    options:["128","64","256","32"],
@@ -582,8 +563,6 @@ const EXAM_TASKS = [
    options:["2","4","8","16"],
    correctIdx:1,
    explanation:"(2⁵ · 2⁻²) : 2 = 2³ : 2¹ = 2² = 4"},
-
-  // ===== СЛОЖНЫЙ (9-10) =====
   {level:"Сложный",
    text:'Найдите значение выражения: <span class="math">((2<sup>3</sup>)<sup>2</sup> · 2<sup>−4</sup>) : (2<sup>2</sup>)<sup>0</sup> + 2<sup>−1</sup></span>',
    options:["4","4,5","5","8,5"],
@@ -625,6 +604,7 @@ function updateTrainerStats(){
   document.getElementById("ts-acc").textContent = acc;
 }
 
+/* ИСПРАВЛЕНО: разделены проверки для тренажёра и экзамена */
 function renderOptions(container, task, prefix){
   container.innerHTML = "";
   const wrap = document.createElement("div");
@@ -642,7 +622,9 @@ function renderOptions(container, task, prefix){
     val.style.fontSize = "1.2rem";
     b.appendChild(val);
     b.addEventListener("click",()=>{
-      if(trainerLocked || (prefix==="exam" && examState.locked)) return;
+      // ИСПРАВЛЕНО: проверяем блокировку только для соответствующего режима
+      if(prefix === "trainer" && trainerLocked) return;
+      if(prefix === "exam" && examState.locked) return;
       wrap.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
       b.classList.add("selected");
     });
@@ -722,7 +704,6 @@ function renderExamTask(){
   document.getElementById("btn-next").classList.add("hidden");
   examState.locked = false;
 
-  // Перемешиваем варианты
   const all = t.options.map((opt,idx) => ({opt, isCorrect: idx===t.correctIdx}));
   const {shuffled, newCorrectIdx} = shuffleWithCorrect(all);
 
