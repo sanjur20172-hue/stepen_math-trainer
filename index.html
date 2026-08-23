@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ОГЭ 2027 · Степени и свойства степеней</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#1e293b; --accent:#3b82f6; --accent-2:#8b5cf6;
+    --ok:#10b981; --err:#ef4444; --text:#e2e8f0; --muted:#94a3b8;
+    --border:#334155;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 100%);
+    color:var(--text);min-height:100vh;padding:20px;
+  }
+  .container{max-width:960px;margin:0 auto}
+  header{
+    text-align:center;padding:30px 20px;margin-bottom:30px;
+    background:rgba(30,41,59,.6);border-radius:16px;
+    border:1px solid var(--border);backdrop-filter:blur(10px);
+  }
+  header h1{font-size:1.8rem;margin-bottom:8px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  header p{color:var(--muted);font-size:.95rem}
+  .card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:16px;padding:28px;margin-bottom:20px;
+  }
+  .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+  .tab{
+    flex:1;min-width:120px;padding:12px 14px;border:1px solid var(--border);
+    background:transparent;color:var(--text);border-radius:10px;
+    cursor:pointer;font-size:.9rem;transition:.2s;
+  }
+  .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));border-color:transparent}
+  .tab:hover:not(.active){background:rgba(59,130,246,.15)}
+  .btn{
+    display:inline-block;padding:12px 22px;border:none;border-radius:10px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:.2s;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(59,130,246,.35)}
+  .btn-secondary{background:transparent;border:1px solid var(--border)}
+  .btn-secondary:hover{background:rgba(255,255,255,.05)}
+  .progress{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin:16px 0}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .4s}
+  .task-level{
+    display:inline-block;padding:4px 10px;border-radius:6px;font-size:.8rem;
+    background:rgba(139,92,246,.2);color:#c4b5fd;margin-bottom:12px;
+  }
+  .task-text{font-size:1.15rem;line-height:1.7;margin-bottom:20px}
+  .task-text .math{
+    font-family:"Cambria Math","Times New Roman",serif;
+    font-style:italic;color:#fbbf24;font-size:1.1em;
+  }
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .option{
+    padding:16px;border:1px solid var(--border);border-radius:10px;
+    background:rgba(255,255,255,.03);cursor:pointer;transition:.2s;
+    text-align:center;font-size:1.1rem;
+    font-family:"Cambria Math","Times New Roman",serif;
+  }
+  .option:hover{border-color:var(--accent);background:rgba(59,130,246,.1)}
+  .option.selected{border-color:var(--accent);background:rgba(59,130,246,.2)}
+  .option.correct{border-color:var(--ok);background:rgba(16,185,129,.15)}
+  .option.wrong{border-color:var(--err);background:rgba(239,68,68,.15)}
+  .option-label{
+    display:inline-block;padding:2px 8px;border-radius:4px;
+    background:rgba(148,163,184,.15);color:var(--muted);
+    font-size:.75rem;margin-bottom:6px;font-family:sans-serif;
+  }
+  select,input[type="text"]{
+    width:100%;padding:12px 16px;background:rgba(255,255,255,.05);
+    border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:1rem;
+  }
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+  .stat{padding:16px;background:rgba(255,255,255,.03);border-radius:10px;text-align:center;border:1px solid var(--border)}
+  .stat-value{font-size:1.8rem;font-weight:700;color:var(--accent)}
+  .stat-label{font-size:.85rem;color:var(--muted);margin-top:4px}
+  .code-box{
+    background:#0b1220;border:1px dashed var(--border);border-radius:10px;
+    padding:14px;font-family:monospace;font-size:.85rem;word-break:break-all;
+    color:#86efac;margin:12px 0;max-height:140px;overflow:auto;
+  }
+  .hidden{display:none}
+  .nav-row{display:flex;justify-content:space-between;gap:10px;margin-top:20px;flex-wrap:wrap}
+  .feedback{margin-top:14px;padding:12px;border-radius:10px;font-size:.95rem}
+  .feedback.ok{background:rgba(16,185,129,.12);color:#6ee7b7;border:1px solid rgba(16,185,129,.3)}
+  .feedback.err{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+  .student-name{font-weight:600;color:#fbbf24}
+  .trainer-stats{
+    display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;
+    padding:12px;background:rgba(255,255,255,.03);border-radius:10px;
+  }
+  .trainer-stats span{color:var(--muted);font-size:.9rem}
+  .trainer-stats b{color:var(--text);font-size:1.1rem;margin-left:4px}
+  .home-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:20px}
+  .home-card{
+    padding:24px;background:rgba(255,255,255,.03);border:1px solid var(--border);
+    border-radius:14px;cursor:pointer;transition:.2s;text-align:left;
+  }
+  .home-card:hover{border-color:var(--accent);transform:translateY(-3px);background:rgba(59,130,246,.08)}
+  .home-card h3{margin-bottom:8px;color:#fbbf24}
+  .home-card p{color:var(--muted);font-size:.9rem;line-height:1.5}
+  .home-card .icon{font-size:2rem;margin-bottom:10px}
+  .result-row{
+    display:grid;grid-template-columns:auto 1fr auto;gap:12px;
+    padding:12px;border-bottom:1px solid var(--border);align-items:center;
+  }
+  .result-row:last-child{border-bottom:none}
+  .badge{padding:4px 10px;border-radius:6px;font-size:.8rem;font-weight:600}
+  .badge.ok{background:rgba(16,185,129,.2);color:#6ee7b7}
+  .badge.err{background:rgba(239,68,68,.2);color:#fca5a5}
+  .formula-box{
+    padding:12px 16px;margin:8px 0;
+    background:rgba(59,130,246,.08);border-left:3px solid var(--accent);
+    border-radius:6px;font-family:"Cambria Math","Times New Roman",serif;
+    font-size:1.1rem;color:#fbbf24;
+  }
+  @media(max-width:700px){
+    header h1{font-size:1.4rem}
+    .card{padding:20px}
+    .task-text{font-size:1rem}
+    .options{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Тренажёр ОГЭ 2027 · Математика</h1>
+    <p>Тема: Степени и свойства степеней (7–9 класс, формат ФИПИ)</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="home">🏠 Главная</button>
+    <button class="tab" data-tab="trainer">💪 Тренажёр</button>
+    <button class="tab" data-tab="exam">📝 Экзамен</button>
+    <button class="tab" data-tab="theory">📘 Теория</button>
+    <button class="tab" data-tab="teacher">👨‍🏫 Преподаватель</button>
+  </div>
+
+  <!-- ГЛАВНАЯ -->
+  <div id="tab-home" class="tab-content">
+    <div class="card">
+      <h2 style="margin-bottom:12px">Добро пожаловать!</h2>
+      <p style="color:var(--muted);line-height:1.6">
+        Подготовка к ОГЭ 2027 по теме «Степень с натуральным и целым показателем.
+        Свойства степеней». Задания соответствуют формату ФИПИ.
+      </p>
+      <div class="home-grid">
+        <div class="home-card" onclick="switchTab('trainer')">
+          <div class="icon">💪</div>
+          <h3>Тренажёр</h3>
+          <p>Бесконечное количество задач на все свойства степеней.</p>
+        </div>
+        <div class="home-card" onclick="switchTab('exam')">
+          <div class="icon">📝</div>
+          <h3>Экзамен</h3>
+          <p>10 заданий: 4 простых, 4 средних, 2 сложных. Результат — преподавателю.</p>
+        </div>
+        <div class="home-card" onclick="switchTab('theory')">
+          <div class="icon">📘</div>
+          <h3>Теория</h3>
+          <p>Все свойства степеней с примерами.</p>
+        </div>
+        <div class="home-card" onclick="switchTab('teacher')">
+          <div class="icon">👨‍🏫</div>
+          <h3>Преподаватель</h3>
+          <p>Проверка результатов учеников по коду.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ТРЕНАЖЁР -->
+  <div id="tab-trainer" class="tab-content hidden">
+    <div class="card">
+      <h2 style="margin-bottom:12px">💪 Тренажёр</h2>
+      <p style="color:var(--muted);margin-bottom:16px">
+        Выберите тип задачи и уровень сложности.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div>
+          <label style="color:var(--muted);font-size:.85rem;display:block;margin-bottom:6px">Тип задачи:</label>
+          <select id="trainer-type">
+            <option value="all">Все типы (случайно)</option>
+            <option value="power">Вычислить aⁿ</option>
+            <option value="mult">Упростить aⁿ · aᵐ (найти показатель)</option>
+            <option value="div">Упростить aⁿ : aᵐ (найти показатель)</option>
+            <option value="pow_pow">Упростить (aⁿ)ᵐ (найти показатель)</option>
+            <option value="calc_mult">Вычислить aⁿ · aᵐ</option>
+            <option value="calc_pow">Вычислить (aⁿ)ᵐ</option>
+            <option value="neg">Вычислить a⁻ⁿ</option>
+            <option value="mixed">Смешанное выражение</option>
+          </select>
+        </div>
+        <div>
+          <label style="color:var(--muted);font-size:.85rem;display:block;margin-bottom:6px">Уровень:</label>
+          <select id="trainer-diff">
+            <option value="1">Лёгкий</option>
+            <option value="2" selected>Средний</option>
+            <option value="3">Сложный</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" id="trainer-new">🎲 Новое задание</button>
+
+      <div class="trainer-stats" style="margin-top:20px">
+        <span>Решено: <b id="ts-total">0</b></span>
+        <span>✅ Верно: <b id="ts-ok" style="color:#6ee7b7">0</b></span>
+        <span>❌ Неверно: <b id="ts-err" style="color:#fca5a5">0</b></span>
+        <span>Точность: <b id="ts-acc">—</b></span>
+      </div>
+    </div>
+
+    <div id="trainer-task" class="card hidden">
+      <div class="task-level" id="trainer-level">Тип</div>
+      <div class="task-text" id="trainer-text"></div>
+      <div id="trainer-input"></div>
+      <div id="trainer-feedback" class="feedback hidden"></div>
+      <div class="nav-row">
+        <button class="btn" id="trainer-check">Проверить</button>
+        <button class="btn btn-secondary hidden" id="trainer-next">Следующая задача →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ЭКЗАМЕН -->
+  <div id="tab-exam" class="tab-content hidden">
+    <div id="exam-start" class="card">
+      <h2 style="margin-bottom:12px">📝 Экзамен: 10 заданий</h2>
+      <p style="color:var(--muted);margin-bottom:16px">
+        Задания идут от простого к сложному:<br>
+        • Задания 1–4 — базовый уровень<br>
+        • Задания 5–8 — средний уровень<br>
+        • Задания 9–10 — сложный уровень
+      </p>
+      <label style="display:block;margin-bottom:10px;color:var(--muted)">Ваше имя (Фамилия Имя):</label>
+      <input type="text" id="student-name" placeholder="Иванов Иван" style="margin-bottom:16px">
+      <button class="btn" id="start-exam">Начать экзамен</button>
+    </div>
+
+    <div id="exam-screen" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span id="task-counter" style="color:var(--muted)">Задание 1 из 10</span>
+        <span class="task-level" id="task-level">Уровень: базовый</span>
+      </div>
+      <div class="progress"><div class="progress-bar" id="progress-bar" style="width:10%"></div></div>
+      <div class="task-text" id="task-text"></div>
+      <div id="task-input"></div>
+      <div id="feedback" class="feedback hidden"></div>
+      <div class="nav-row">
+        <button class="btn" id="btn-check">Проверить</button>
+        <button class="btn btn-secondary hidden" id="btn-next">Далее →</button>
+      </div>
+    </div>
+
+    <div id="result-screen" class="card hidden">
+      <h2 style="margin-bottom:12px">🎉 Экзамен завершён!</h2>
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-value" id="score-correct">0</div><div class="stat-label">Правильно</div></div>
+        <div class="stat"><div class="stat-value" id="score-wrong">0</div><div class="stat-label">Неправильно</div></div>
+        <div class="stat"><div class="stat-value" id="score-percent">0%</div><div class="stat-label">Результат</div></div>
+      </div>
+      <p style="color:var(--muted);margin-bottom:8px">📋 Передайте этот код преподавателю:</p>
+      <div class="code-box" id="result-code"></div>
+      <button class="btn btn-secondary" id="btn-copy">📎 Скопировать код</button>
+      <button class="btn" id="btn-retry" style="margin-left:8px">Пройти ещё раз</button>
+    </div>
+  </div>
+
+  <!-- ТЕОРИЯ -->
+  <div id="tab-theory" class="tab-content hidden">
+    <div class="card">
+      <h2 style="margin-bottom:16px">📘 Свойства степеней</h2>
+      <div style="line-height:1.8;font-size:1.05rem">
+        <p><b>1. Определение степени:</b></p>
+        <div class="formula-box">aⁿ = a · a · ... · a (n раз)</div>
+
+        <p style="margin-top:16px"><b>2. Умножение степеней (одинаковые основания):</b></p>
+        <div class="formula-box">aⁿ · aᵐ = aⁿ⁺ᵐ</div>
+        <p style="color:var(--muted);padding-left:20px">Пример: 2³ · 2⁴ = 2⁷ = 128</p>
+
+        <p style="margin-top:16px"><b>3. Деление степеней (одинаковые основания):</b></p>
+        <div class="formula-box">aⁿ : aᵐ = aⁿ⁻ᵐ (a ≠ 0)</div>
+        <p style="color:var(--muted);padding-left:20px">Пример: 5⁶ : 5² = 5⁴ = 625</p>
+
+        <p style="margin-top:16px"><b>4. Возведение степени в степень:</b></p>
+        <div class="formula-box">(aⁿ)ᵐ = aⁿ·ᵐ</div>
+        <p style="color:var(--muted);padding-left:20px">Пример: (3²)⁴ = 3⁸ = 6561</p>
+
+        <p style="margin-top:16px"><b>5. Степень произведения:</b></p>
+        <div class="formula-box">(a · b)ⁿ = aⁿ · bⁿ</div>
+        <p style="color:var(--muted);padding-left:20px">Пример: (2 · 3)² = 2² · 3² = 4 · 9 = 36</p>
+
+        <p style="margin-top:16px"><b>6. Степень частного:</b></p>
+        <div class="formula-box">(a / b)ⁿ = aⁿ / bⁿ (b ≠ 0)</div>
+
+        <p style="margin-top:16px"><b>7. Нулевая степень:</b></p>
+        <div class="formula-box">a⁰ = 1 (a ≠ 0)</div>
+
+        <p style="margin-top:16px"><b>8. Отрицательная степень:</b></p>
+        <div class="formula-box">a⁻ⁿ = 1 / aⁿ (a ≠ 0)</div>
+        <p style="color:var(--muted);padding-left:20px">Пример: 2⁻³ = 1/8 = 0,125</p>
+
+        <p style="margin-top:16px"><b>9. Первая степень:</b></p>
+        <div class="formula-box">a¹ = a</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ПРЕПОДАВАТЕЛЬ -->
+  <div id="tab-teacher" class="tab-content hidden">
+    <div class="card">
+      <h2 style="margin-bottom:12px">👨‍🏫 Проверка результатов</h2>
+      <p style="color:var(--muted);margin-bottom:16px">
+        Вставьте код, полученный от ученика после экзамена.
+      </p>
+      <textarea id="teacher-code" rows="4" placeholder="Вставьте код результата..." style="width:100%;padding:12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:monospace;font-size:.85rem;resize:vertical;margin-bottom:12px"></textarea>
+      <button class="btn" id="btn-decode">Расшифровать результат</button>
+      <div id="teacher-error" class="feedback err hidden" style="margin-top:12px"></div>
+    </div>
+    <div id="teacher-results" class="hidden">
+      <div class="card">
+        <h2>Результаты: <span class="student-name" id="t-name"></span></h2>
+        <p style="color:var(--muted);margin:6px 0" id="t-date"></p>
+        <div class="stat-grid">
+          <div class="stat"><div class="stat-value" id="t-correct">0</div><div class="stat-label">Правильно</div></div>
+          <div class="stat"><div class="stat-value" id="t-wrong">0</div><div class="stat-label">Неправильно</div></div>
+          <div class="stat"><div class="stat-value" id="t-percent">0%</div><div class="stat-label">Итог</div></div>
+          <div class="stat"><div class="stat-value" id="t-grade">—</div><div class="stat-label">Оценка (5-балл.)</div></div>
+        </div>
+        <h3 style="margin:20px 0 12px">Детализация по заданиям</h3>
+        <div id="t-details"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   УТИЛИТЫ
+   ========================================================= */
+function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function shuffleWithCorrect(arr){
+  const a = arr.slice();
+  let attempts = 0, correctIdx;
+  do {
+    for(let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    correctIdx = a.findIndex(item => item.isCorrect);
+    attempts++;
+  } while(correctIdx === 0 && attempts < 10);
+  return {shuffled: a, newCorrectIdx: correctIdx};
+}
+
+/* Форматирование ответа: целое или конечная десятичная */
+function fmtAnswer(x){
+  if(Number.isInteger(x)) return String(x);
+  // Конечная десятичная
+  let s = x.toFixed(6).replace(/\.?0+$/, "");
+  if(s.includes(".")) s = s.replace(".", ",");
+  return s;
+}
+
+/* Проверка равенства ответов */
+function answersEqual(a, b){
+  return Math.abs(a - b) < 1e-9;
+}
+
+/* =========================================================
+   ГЕНЕРАТОР ЗАДАЧ ТРЕНАЖЁРА
+   ========================================================= */
+function buildChoice(level, text, correct, distractors, explanation){
+  const all = [
+    {val: correct, isCorrect: true},
+    ...distractors.map(d => ({val: d, isCorrect: false}))
+  ];
+  const {shuffled, newCorrectIdx} = shuffleWithCorrect(all);
+  return {
+    level, text,
+    options: shuffled.map(o => fmtAnswer(o.val)),
+    correctIdx: newCorrectIdx,
+    correctVal: correct,
+    explanation
+  };
+}
+
+function generateTask(type, difficulty){
+  const d = parseInt(difficulty);
+  const types = type === "all"
+    ? ["power","mult","div","pow_pow","calc_mult","calc_pow","neg","mixed"]
+    : [type];
+  const pick = types[randInt(0, types.length - 1)];
+
+  const bases = d===1 ? [2,3,5] : d===2 ? [2,3,4,5,10] : [2,3,4,5,6,10];
+
+  switch(pick){
+
+    /* ===== aⁿ = ? ===== */
+    case "power": {
+      const a = bases[randInt(0, bases.length-1)];
+      const n = randInt(d===1?2:2, d===1?4:d===2?5:6);
+      const correct = Math.pow(a, n);
+      const d1 = a * n; // типичная ошибка: умножение вместо возведения
+      const d2 = a + n;
+      const d3 = Math.pow(a, n-1);
+      const text = `Вычислите: <span class="math">${a}<sup>${n}</sup></span>`;
+      const explanation = `${a}ⁿ = ${a} · ${a} · ... (${n} раз) = ${correct}`;
+      return buildChoice("Вычисление степени", text, correct, [d1,d2,d3], explanation);
+    }
+
+    /* ===== aⁿ · aᵐ = aᵏ, найти k ===== */
+    case "mult": {
+      const a = bases[randInt(0, bases.length-1)];
+      const n = randInt(2, d===1?4:d===2?6:8);
+      const m = randInt(2, d===1?4:d===2?6:8);
+      const k = n + m;
+      const correct = k;
+      const d1 = n * m;
+      const d2 = n - m;
+      const d3 = Math.abs(m - n) === 0 ? k+1 : Math.abs(m - n);
+      const text = `Представьте в виде степени: <span class="math">${a}<sup>${n}</sup> · ${a}<sup>${m}</sup> = ${a}<sup>?</sup></span><br>Найдите показатель степени:`;
+      const explanation = `aⁿ · aᵐ = aⁿ⁺ᵐ. Показатель: ${n} + ${m} = ${k}`;
+      return buildChoice("Умножение степеней", text, correct, [d1,d2,d3], explanation);
+    }
+
+    /* ===== aⁿ : aᵐ = aᵏ, найти k ===== */
+    case "div": {
+      const a = bases[randInt(0, bases.length-1)];
+      const n = randInt(4, d===1?6:d===2?8:10);
+      const m = randInt(1, n-1);
+      const k = n - m;
+      const correct = k;
+      const d1 = n + m;
+      const d2 = n * m;
+      const d3 = k + 1;
+      const text = `Представьте в виде степени: <span class="math">${a}<sup>${n}</sup> : ${a}<sup>${m}</sup> = ${a}<sup>?</sup></span><br>Найдите показатель степени:`;
+      const explanation = `aⁿ : aᵐ = aⁿ⁻ᵐ. Показатель: ${n} − ${m} = ${k}`;
+      return buildChoice("Деление степеней", text, correct, [d1,d2,d3], explanation);
+    }
+
+    /* ===== (aⁿ)ᵐ = aᵏ, найти k ===== */
+    case "pow_pow": {
+      const a = bases[randInt(0, bases.length-1)];
+      const n = randInt(2, d===1?3:d===2?4:5);
+      const m = randInt(2, d===1?3:d===2?4:5);
+      const k = n * m;
+      const correct = k;
+      const d1 = n + m;
+      const d2 = n - m;
+      const d3 = k + 1;
+      const text = `Представьте в виде степени: <span class="math">(${a}<sup>${n}</sup>)<sup>${m}</sup> = ${a}<sup>?</sup></span><br>Найдите показатель степени:`;
+      const explanation = `(aⁿ)ᵐ = aⁿ·ᵐ. Показатель: ${n} · ${m} = ${k}`;
+      return buildChoice("Степень в степени", text, correct, [d1,d2,d3], explanation);
+    }
+
+    /* ===== Вычислить aⁿ · aᵐ = aⁿ⁺ᵐ ===== */
+    case "calc_mult": {
+      const a = bases[randInt(0, bases.length-1)];
+      const n = randInt(2, d===1?3:d===2?4:5);
+      const m = randInt(1, d===1?3:d===2?4:5);
+      const correct = Math.pow(a, n + m);
+      const d1 = Math.pow(a, n) + Math.pow(a, m); // типичная ошибка: сложение вместо умножения
+      const d2 = Math.pow(a, n * m);
+      const d3 = Math.pow(a, Math.abs(n - m));
+      const text = `Вычислите: <span class="math">${a}<sup>${n}</sup> · ${a}<sup>${m}</sup></span>`;
+      const explanation = `${a}ⁿ · ${a}ᵐ = ${a}ⁿ⁺ᵐ = ${a}^${n+m} = ${correct}`;
+      return buildChoice("Вычисление произведения", text, correct, [d1,d2,d3], explanation);
+    }
+
+    /* ===== Вычислить (aⁿ)ᵐ ===== */
+    case "calc_pow": {
+      const a = bases[randInt(0, Math.min(2, bases.length-1))]; // 2 или 3
+      const n = randInt(2, 3);
+      const m = randInt(2, d===1?2:d===2?3:4);
+      const correct = Math.pow(a, n * m);
+      const d1 = Math.pow(a, n + m);
+      const d2 = Math.pow(a, n) + Math.pow(a, m);
+      const d3 = Math.pow(a, n * m - 1);
+      const text = `Вычислите: <span class="math">(${a}<sup>${n}</sup>)<sup>${m}</sup></span>`;
+      const explanation = `(${a}ⁿ)ᵐ = ${a}ⁿ·ᵐ = ${a}^${n*m} = ${correct}`;
+      return buildChoice("Вычисление степени степени", text, correct, [d1,d2,d3], explanation);
+    }
+
+    /* ===== a⁻ⁿ ===== */
+    case "neg": {
+      const a = [2,4,5,10][randInt(0,3)];
+      const n = randInt(1, d===1?2:d===2?3:4);
+      const correct = 1 / Math.pow(a, n);
+      const d1 = -Math.pow(a, n);
+      const d2 = Math.pow(a, n);
+      const d3 = 1 / n;
+      const text = `Вычислите: <span class="math">${a}<sup>−${n}</sup></span>`;
+      const explanation = `${a}⁻ⁿ = 1/${a}ⁿ = 1/${Math.pow(a,n)} = ${fmtAnswer(correct)}`;
+      return buildChoice("Отрицательная степень", text, correct, [d1,d2,d3], explanation);
+    }
+
+    /* ===== Смешанное выражение ===== */
+    case "mixed": {
+      const a = [2,3,5][randInt(0,2)];
+      const n1 = randInt(2, 4);
+      const n2 = randInt(1, 3);
+      const n3 = randInt(1, 3);
+      // (aⁿ¹ · aⁿ²) : aⁿ³ = aⁿ¹⁺ⁿ²⁻ⁿ³
+      const k = n1 + n2 - n3;
+      if(k <= 0) return generateTask(type, difficulty);
+      const correct = Math.pow(a, k);
+      const d1 = Math.pow(a, k+1);
+      const d2 = Math.pow(a, k-1);
+      const d3 = Math.pow(a, n1 * n2 - n3);
+      const text = `Вычислите: <span class="math">(${a}<sup>${n1}</sup> · ${a}<sup>${n2}</sup>) : ${a}<sup>${n3}</sup></span>`;
+      const explanation = `(${a}ⁿ¹ · ${a}ⁿ²) : ${a}ⁿ³ = ${a}ⁿ¹⁺ⁿ²⁻ⁿ³ = ${a}^${k} = ${correct}`;
+      return buildChoice("Смешанное выражение", text, correct, [d1,d2,d3], explanation);
+    }
+  }
+}
+
+/* =========================================================
+   БАНК ЭКЗАМЕНА — 10 заданий
+   1-4: базовый, 5-8: средний, 9-10: сложный
+   Все ответы — целые или конечные десятичные
+   ========================================================= */
+const EXAM_TASKS = [
+  // ===== БАЗОВЫЙ (1-4) =====
+  {level:"Базовый",
+   text:'Вычислите: <span class="math">2<sup>5</sup></span>',
+   options:["10","32","64","7"],
+   correctIdx:1,
+   explanation:"2⁵ = 2·2·2·2·2 = 32"},
+  {level:"Базовый",
+   text:'Вычислите: <span class="math">3<sup>4</sup></span>',
+   options:["12","81","64","27"],
+   correctIdx:1,
+   explanation:"3⁴ = 3·3·3·3 = 81"},
+  {level:"Базовый",
+   text:'Найдите значение выражения: <span class="math">5<sup>3</sup> · 5<sup>2</sup></span>',
+   options:["3125","25","125","625"],
+   correctIdx:0,
+   explanation:"5³ · 5² = 5⁵ = 3125"},
+  {level:"Базовый",
+   text:'Вычислите: <span class="math">10<sup>−2</sup></span>',
+   options:["−100","0,01","−20","0,1"],
+   correctIdx:1,
+   explanation:"10⁻² = 1/10² = 1/100 = 0,01"},
+
+  // ===== СРЕДНИЙ (5-8) =====
+  {level:"Средний",
+   text:'Найдите значение выражения: <span class="math">(2<sup>3</sup>)<sup>4</sup> · 2<sup>−5</sup></span>',
+   options:["128","64","256","32"],
+   correctIdx:0,
+   explanation:"(2³)⁴ · 2⁻⁵ = 2¹² · 2⁻⁵ = 2⁷ = 128"},
+  {level:"Средний",
+   text:'Найдите значение выражения: <span class="math">(3<sup>2</sup>)<sup>3</sup> : 3<sup>4</sup></span>',
+   options:["3","9","27","81"],
+   correctIdx:1,
+   explanation:"(3²)³ : 3⁴ = 3⁶ : 3⁴ = 3² = 9"},
+  {level:"Средний",
+   text:'Найдите значение выражения: <span class="math">(4<sup>−1</sup>)<sup>2</sup> · 4<sup>5</sup></span>',
+   options:["16","64","256","1024"],
+   correctIdx:1,
+   explanation:"(4⁻¹)² · 4⁵ = 4⁻² · 4⁵ = 4³ = 64"},
+  {level:"Средний",
+   text:'Найдите значение выражения: <span class="math">(2<sup>5</sup> · 2<sup>−2</sup>) : 2</span>',
+   options:["2","4","8","16"],
+   correctIdx:1,
+   explanation:"(2⁵ · 2⁻²) : 2 = 2³ : 2¹ = 2² = 4"},
+
+  // ===== СЛОЖНЫЙ (9-10) =====
+  {level:"Сложный",
+   text:'Найдите значение выражения: <span class="math">((2<sup>3</sup>)<sup>2</sup> · 2<sup>−4</sup>) : (2<sup>2</sup>)<sup>0</sup> + 2<sup>−1</sup></span>',
+   options:["4","4,5","5","8,5"],
+   correctIdx:1,
+   explanation:"((2³)² · 2⁻⁴) : (2²)⁰ + 2⁻¹ = (2⁶ · 2⁻⁴) : 1 + 0,5 = 2² + 0,5 = 4 + 0,5 = 4,5"},
+  {level:"Сложный",
+   text:'Найдите значение выражения: <span class="math">(3<sup>4</sup> · 9<sup>−1</sup>)<sup>2</sup> : 3<sup>−2</sup></span>',
+   options:["81","243","729","2187"],
+   correctIdx:2,
+   explanation:"(3⁴ · 9⁻¹)² : 3⁻² = (3⁴ · 3⁻²)² : 3⁻² = (3²)² : 3⁻² = 3⁴ : 3⁻² = 3⁶ = 729"}
+];
+
+/* =========================================================
+   ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+   ========================================================= */
+function switchTab(name){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  const t = document.querySelector(`.tab[data-tab="${name}"]`);
+  if(t) t.classList.add("active");
+  document.querySelectorAll(".tab-content").forEach(c=>c.classList.add("hidden"));
+  document.getElementById("tab-"+name).classList.remove("hidden");
+}
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>switchTab(t.dataset.tab));
+});
+
+/* =========================================================
+   ТРЕНАЖЁР
+   ========================================================= */
+const trainerStats = {total:0, ok:0, err:0};
+let currentTrainerTask = null;
+let trainerLocked = false;
+
+function updateTrainerStats(){
+  document.getElementById("ts-total").textContent = trainerStats.total;
+  document.getElementById("ts-ok").textContent = trainerStats.ok;
+  document.getElementById("ts-err").textContent = trainerStats.err;
+  const acc = trainerStats.total===0 ? "—" : Math.round(trainerStats.ok/trainerStats.total*100)+"%";
+  document.getElementById("ts-acc").textContent = acc;
+}
+
+function renderOptions(container, task, prefix){
+  container.innerHTML = "";
+  const wrap = document.createElement("div");
+  wrap.className = "options";
+  task.options.forEach((opt,i)=>{
+    const b = document.createElement("div");
+    b.className = "option";
+    b.dataset.idx = i;
+    const label = document.createElement("div");
+    label.className = "option-label";
+    label.textContent = String.fromCharCode(65+i);
+    b.appendChild(label);
+    const val = document.createElement("div");
+    val.textContent = opt;
+    val.style.fontSize = "1.2rem";
+    b.appendChild(val);
+    b.addEventListener("click",()=>{
+      if(trainerLocked || (prefix==="exam" && examState.locked)) return;
+      wrap.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+      b.classList.add("selected");
+    });
+    wrap.appendChild(b);
+  });
+  container.appendChild(wrap);
+}
+
+function renderTrainerTask(){
+  const type = document.getElementById("trainer-type").value;
+  const diff = document.getElementById("trainer-diff").value;
+  currentTrainerTask = generateTask(type, diff);
+  trainerLocked = false;
+
+  document.getElementById("trainer-task").classList.remove("hidden");
+  document.getElementById("trainer-level").textContent = currentTrainerTask.level;
+  document.getElementById("trainer-text").innerHTML = currentTrainerTask.text;
+  document.getElementById("trainer-feedback").classList.add("hidden");
+  document.getElementById("trainer-check").classList.remove("hidden");
+  document.getElementById("trainer-next").classList.add("hidden");
+
+  renderOptions(document.getElementById("trainer-input"), currentTrainerTask, "trainer");
+}
+
+document.getElementById("trainer-new").addEventListener("click", renderTrainerTask);
+
+document.getElementById("trainer-check").addEventListener("click",()=>{
+  if(trainerLocked) return;
+  const sel = document.querySelector("#trainer-input .option.selected");
+  if(!sel){ alert("Выберите вариант ответа"); return; }
+  const idx = parseInt(sel.dataset.idx);
+  const isOk = idx === currentTrainerTask.correctIdx;
+  trainerLocked = true;
+  trainerStats.total++;
+  if(isOk) trainerStats.ok++; else trainerStats.err++;
+  updateTrainerStats();
+
+  document.querySelectorAll("#trainer-input .option").forEach((o,i)=>{
+    if(i===currentTrainerTask.correctIdx) o.classList.add("correct");
+    else if(i===idx && !isOk) o.classList.add("wrong");
+  });
+
+  const fb = document.getElementById("trainer-feedback");
+  fb.classList.remove("hidden");
+  fb.className = "feedback " + (isOk?"ok":"err");
+  fb.innerHTML = (isOk?"✅ Верно! ":"❌ Неверно. Правильный ответ: <b>"+currentTrainerTask.options[currentTrainerTask.correctIdx]+"</b>. ")
+               + "<br><small>"+currentTrainerTask.explanation+"</small>";
+  document.getElementById("trainer-check").classList.add("hidden");
+  document.getElementById("trainer-next").classList.remove("hidden");
+});
+
+document.getElementById("trainer-next").addEventListener("click", renderTrainerTask);
+
+/* =========================================================
+   ЭКЗАМЕН
+   ========================================================= */
+let examState = {name:"",current:0,answers:[],start:null,locked:false,currentTask:null};
+
+document.getElementById("start-exam").addEventListener("click",()=>{
+  const name = document.getElementById("student-name").value.trim();
+  if(name.length<2){ alert("Введите имя (минимум 2 символа)"); return; }
+  examState = {name, current:0, answers:[], start:Date.now(), locked:false, currentTask:null};
+  document.getElementById("exam-start").classList.add("hidden");
+  document.getElementById("result-screen").classList.add("hidden");
+  document.getElementById("exam-screen").classList.remove("hidden");
+  renderExamTask();
+});
+
+function renderExamTask(){
+  const t = EXAM_TASKS[examState.current];
+  document.getElementById("task-counter").textContent = `Задание ${examState.current+1} из ${EXAM_TASKS.length}`;
+  document.getElementById("task-level").textContent = "Уровень: "+t.level;
+  document.getElementById("progress-bar").style.width = ((examState.current+1)/EXAM_TASKS.length*100)+"%";
+  document.getElementById("task-text").innerHTML = t.text;
+  document.getElementById("feedback").classList.add("hidden");
+  document.getElementById("btn-check").classList.remove("hidden");
+  document.getElementById("btn-next").classList.add("hidden");
+  examState.locked = false;
+
+  // Перемешиваем варианты
+  const all = t.options.map((opt,idx) => ({opt, isCorrect: idx===t.correctIdx}));
+  const {shuffled, newCorrectIdx} = shuffleWithCorrect(all);
+
+  examState.currentTask = {
+    ...t,
+    options: shuffled.map(o => o.opt),
+    correctIdx: newCorrectIdx
+  };
+
+  renderOptions(document.getElementById("task-input"), examState.currentTask, "exam");
+}
+
+document.getElementById("btn-check").addEventListener("click",()=>{
+  if(examState.locked) return;
+  const sel = document.querySelector("#task-input .option.selected");
+  if(!sel){ alert("Выберите вариант ответа"); return; }
+  const userAnswer = parseInt(sel.dataset.idx);
+
+  const currentTask = examState.currentTask;
+  const isCorrect = userAnswer === currentTask.correctIdx;
+  const correctAnswer = currentTask.options[currentTask.correctIdx];
+  const userAnswerStr = currentTask.options[userAnswer];
+
+  document.querySelectorAll("#task-input .option").forEach((o,i)=>{
+    if(i===currentTask.correctIdx) o.classList.add("correct");
+    else if(i===userAnswer && !isCorrect) o.classList.add("wrong");
+  });
+
+  const t = EXAM_TASKS[examState.current];
+  examState.answers.push({
+    taskIndex: examState.current,
+    userAnswer: userAnswerStr,
+    isCorrect, correctAnswer,
+    level: t.level
+  });
+  examState.locked = true;
+
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden");
+  fb.className = "feedback " + (isCorrect?"ok":"err");
+  fb.innerHTML = (isCorrect?"✅ Верно! ":"❌ Неверно. Правильный ответ: <b>"+correctAnswer+"</b>. ")
+               + "<br><small>"+t.explanation+"</small>";
+  document.getElementById("btn-check").classList.add("hidden");
+  document.getElementById("btn-next").classList.remove("hidden");
+});
+
+document.getElementById("btn-next").addEventListener("click",()=>{
+  examState.current++;
+  if(examState.current >= EXAM_TASKS.length) finishExam();
+  else renderExamTask();
+});
+
+function finishExam(){
+  const correct = examState.answers.filter(a=>a.isCorrect).length;
+  const wrong = examState.answers.length - correct;
+  const percent = Math.round(correct/EXAM_TASKS.length*100);
+  document.getElementById("score-correct").textContent = correct;
+  document.getElementById("score-wrong").textContent = wrong;
+  document.getElementById("score-percent").textContent = percent+"%";
+
+  const payload = {
+    v:1, name: examState.name,
+    date: new Date().toISOString(),
+    duration: Math.round((Date.now()-examState.start)/1000),
+    answers: examState.answers
+  };
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  document.getElementById("result-code").textContent = code;
+
+  document.getElementById("exam-screen").classList.add("hidden");
+  document.getElementById("result-screen").classList.remove("hidden");
+}
+
+document.getElementById("btn-copy").addEventListener("click",()=>{
+  const code = document.getElementById("result-code").textContent;
+  navigator.clipboard.writeText(code).then(()=>{
+    document.getElementById("btn-copy").textContent = "✅ Скопировано!";
+    setTimeout(()=>document.getElementById("btn-copy").textContent="📎 Скопировать код",2000);
+  });
+});
+
+document.getElementById("btn-retry").addEventListener("click",()=>{
+  document.getElementById("result-screen").classList.add("hidden");
+  document.getElementById("exam-start").classList.remove("hidden");
+});
+
+/* =========================================================
+   ПРЕПОДАВАТЕЛЬ
+   ========================================================= */
+document.getElementById("btn-decode").addEventListener("click",()=>{
+  const errBox = document.getElementById("teacher-error");
+  errBox.classList.add("hidden");
+  const raw = document.getElementById("teacher-code").value.trim();
+  if(!raw){ errBox.textContent="Введите код результата."; errBox.classList.remove("hidden"); return; }
+  try{
+    const json = decodeURIComponent(escape(atob(raw)));
+    const data = JSON.parse(json);
+    if(!data.answers || !Array.isArray(data.answers)) throw new Error("bad");
+    showTeacherResults(data);
+  }catch(e){
+    errBox.textContent="❌ Не удалось расшифровать код. Проверьте, что код скопирован полностью.";
+    errBox.classList.remove("hidden");
+  }
+});
+
+function showTeacherResults(data){
+  document.getElementById("teacher-results").classList.remove("hidden");
+  document.getElementById("t-name").textContent = data.name;
+  document.getElementById("t-date").textContent = "Дата: "+new Date(data.date).toLocaleString("ru-RU")
+    +" · Время: "+Math.floor(data.duration/60)+" мин "+(data.duration%60)+" с";
+
+  const correct = data.answers.filter(a=>a.isCorrect).length;
+  const wrong = data.answers.length - correct;
+  const percent = Math.round(correct/EXAM_TASKS.length*100);
+  let grade = "2";
+  if(percent>=90) grade="5";
+  else if(percent>=70) grade="4";
+  else if(percent>=50) grade="3";
+
+  document.getElementById("t-correct").textContent = correct;
+  document.getElementById("t-wrong").textContent = wrong;
+  document.getElementById("t-percent").textContent = percent+"%";
+  document.getElementById("t-grade").textContent = grade;
+
+  const det = document.getElementById("t-details");
+  det.innerHTML = "";
+  data.answers.forEach((a,i)=>{
+    const t = EXAM_TASKS[a.taskIndex];
+    const row = document.createElement("div");
+    row.className = "result-row";
+    row.innerHTML = `
+      <span style="color:var(--muted);font-weight:600">№${i+1}</span>
+      <div>
+        <div style="font-size:.9rem">${t.text.replace(/<[^>]+>/g," ")}</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px">
+          Уровень: ${a.level} · Ответ ученика: <b>${a.userAnswer}</b>
+          · Верно: <b>${a.correctAnswer}</b>
+        </div>
+      </div>
+      <span class="badge ${a.isCorrect?'ok':'err'}">${a.isCorrect?'✓ ВЕРНО':'✗ ОШИБКА'}</span>
+    `;
+    det.appendChild(row);
+  });
+}
+</script>
+</body>
+</html>
